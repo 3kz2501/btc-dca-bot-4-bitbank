@@ -26,7 +26,7 @@ async function createOrder(amount: string, env: Env): Promise<OrderResponse> {
 		side: "buy",
 		type: "market",
 	});
-	console.log("Request body:", body);
+	console.log("Order Detail: ", body);
 
 	const signature = await createSignature(nonce, body, env.BITBANK_API_SECRET);
 
@@ -149,7 +149,15 @@ export default {
 					`Invalid PURCHASE_AMOUNT_JPY: ${env.PURCHASE_AMOUNT_JPY}`,
 				);
 			}
-			console.log("Your Order Amount: ", purchaseAmountJPY);
+			console.log(`Your Order Amount: ${purchaseAmountJPY} JPY`);
+
+			// jpy の残高を取得
+			const balance = await getBalance(env);
+			console.log(`Current balance: ${balance} JPY`);
+			if (balance < purchaseAmountJPY) {
+				console.error("Insufficient balance: ", balance);
+				return;
+			}
 
 			// ペア情報を取得
 			const pairInfo = await getPairInfo();
@@ -164,18 +172,8 @@ export default {
 			const unitAmount = btcJpyPair.unit_amount;
 			const marketMaxAmount = btcJpyPair.market_max_amount;
 			console.log(
-				"btc_jpy pair amount range: {} ~ {}",
-				unitAmount,
-				marketMaxAmount,
+				`btc_jpy pair amount range: ${unitAmount} ~ ${marketMaxAmount}`,
 			);
-
-			// jpy の残高を取得
-			const balance = await getBalance(env);
-			console.log(`Current balance: ${balance} JPY`);
-			if (balance < purchaseAmountJPY) {
-				console.error("Insufficient balance: ", balance);
-				return;
-			}
 
 			// 現在の Bitcoin の価格を取得
 			const bitcoinPrice = await getBitcoinPrice();
