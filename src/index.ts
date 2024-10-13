@@ -143,59 +143,63 @@ export default {
 		// event などでcron のどのタイミングで実行されるかを指定できたりする
 		try {
 			console.log("Starting Bitcoin purchase process...");
-			console.log("Your Order Amount: ", env.PURCHASE_AMOUNT_JPY);
-			const pairInfo = await getPairInfo();
-			// name === "btc_jpy" のペアの最小・最大取引量を表示
-			const btcJpyPair = pairInfo.data.pairs.find(
-				(pair) => pair.name === "btc_jpy",
-			);
-			if (btcJpyPair) {
-				const unitAmount = btcJpyPair.unit_amount;
-				const marketMaxAmount = btcJpyPair.market_max_amount;
-				console.log(
-					"btc_jpy pair amount range: {} ~ {}",
-					unitAmount,
-					marketMaxAmount,
-				);
-				if (
-					Number.parseFloat(env.PURCHASE_AMOUNT_JPY) <
-						Number.parseFloat(unitAmount) ||
-					Number.parseFloat(env.PURCHASE_AMOUNT_JPY) >
-						Number.parseFloat(marketMaxAmount)
-				) {
-					throw new Error(
-						`Invalid PURCHASE_AMOUNT_JPY: ${env.PURCHASE_AMOUNT_JPY}`,
-					);
-				}
-			} else {
-				throw new Error("btc_jpy pair not found");
-			}
-
-			const balance = await getBalance(env);
-			console.log(`Current balance: ${balance} JPY`);
-			if (balance < Number.parseInt(env.PURCHASE_AMOUNT_JPY)) {
-				console.log("Balance is insufficient. Sending notification email...");
-				// 指定のアドレスにメール通知など贈りたい場合はここに処理を追加します
-				return;
-			}
-
-			const bitcoinPrice = await getBitcoinPrice();
-			console.log(`Current Bitcoin price: ${bitcoinPrice} JPY`);
-
 			const purchaseAmountJPY = Number.parseFloat(env.PURCHASE_AMOUNT_JPY);
 			if (Number.isNaN(purchaseAmountJPY) || purchaseAmountJPY <= 0) {
 				throw new Error(
 					`Invalid PURCHASE_AMOUNT_JPY: ${env.PURCHASE_AMOUNT_JPY}`,
 				);
 			}
+			console.log("Your Order Amount: ", purchaseAmountJPY);
 
-			const bitcoinAmount = (purchaseAmountJPY / bitcoinPrice).toFixed(8);
+			// ペア情報を取得
+			const pairInfo = await getPairInfo();
+			// btc_jpy ペアを取得
+			const btcJpyPair = pairInfo.data.pairs.find(
+				(pair) => pair.name === "btc_jpy",
+			);
+			if (!btcJpyPair) {
+				throw new Error("btc_jpy pair not found");
+			}
+			// name === "btc_jpy" のペアの最小・最大取引量を表示
+			const unitAmount = btcJpyPair.unit_amount;
+			const marketMaxAmount = btcJpyPair.market_max_amount;
+			console.log(
+				"btc_jpy pair amount range: {} ~ {}",
+				unitAmount,
+				marketMaxAmount,
+			);
+
+			// jpy の残高を取得
+			const balance = await getBalance(env);
+			console.log(`Current balance: ${balance} JPY`);
+			if (balance < purchaseAmountJPY) {
+				console.error("Insufficient balance: ", balance);
+				return;
+			}
+
+			// 現在の Bitcoin の価格を取得
+			const bitcoinPrice = await getBitcoinPrice();
+			console.log(`Current Bitcoin price: ${bitcoinPrice} JPY`);
+
+			// 購入する Bitcoin の量を計算
+			const bitcoinAmount = purchaseAmountJPY / bitcoinPrice;
 			console.log(
 				`Attempting to purchase ${bitcoinAmount} BTC for ${purchaseAmountJPY} JPY`,
 			);
+			// 購入する Bitcoin の量が取引可能な範囲内かどうかを確認
+			if (
+				bitcoinAmount < Number.parseFloat(unitAmount) ||
+				bitcoinAmount > Number.parseFloat(marketMaxAmount)
+			) {
+				throw new Error(
+					`Invalid PURCHASE_AMOUNT_JPY: ${env.PURCHASE_AMOUNT_JPY}`,
+				);
+			}
 
-			const orderResponse = await createOrder(bitcoinAmount, env);
+			// 注文を作成
+			const orderResponse = await createOrder(bitcoinAmount.toFixed(8), env);
 
+			// 注文が成功したかどうかを確認
 			if (orderResponse.success) {
 				console.log("Order successfully placed:", orderResponse.data);
 			} else {
