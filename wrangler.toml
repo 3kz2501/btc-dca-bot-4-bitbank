@@ -4,8 +4,9 @@ compatibility_date = "2023-05-18"
 
 [vars]
 PURCHASE_AMOUNT_JPY = "1000"
-MAILCHANNELS_DOMAIN = "nilnull.xyz"
-MAILCHANNELS_FROM_EMAIL = "noreplay@nilnull.xyz"
 
 [triggers]
 crons = ["0 1 * * *"]  # 毎日10:00 JSTに実行
+
+[observability]
+enabled = true
