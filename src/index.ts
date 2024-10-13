@@ -115,8 +115,10 @@ async function getBalance(env: Env): Promise<number> {
 			`Failed to fetch balance: status ${response.status}, message: ${errorBody}`,
 		);
 	}
-
 	const data: AssetsResponse = await response.json();
+	if (data.success === 0) {
+		throw new Error(`Failed to fetch balance: ${JSON.stringify(data)}`);
+	}
 	const jpyAsset = data.data.assets.find((asset) => asset.asset === "jpy");
 	if (jpyAsset) {
 		return Number.parseFloat(jpyAsset.onhand_amount);
