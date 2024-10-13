@@ -40,6 +40,7 @@ async function createOrder(amount: string, env: Env): Promise<OrderResponse> {
 		},
 		body: body,
 	});
+	console.log("Order response:", response);
 
 	if (!response.ok) {
 		const errorBody = await response.text();
@@ -85,6 +86,7 @@ async function getBitcoinPrice(): Promise<number> {
 			`Failed to fetch Bitcoin price: status ${response.status}, message: ${errorBody}`,
 		);
 	}
+	console.log("Ticker response:", response);
 	const data: TickerResponse = await response.json();
 	return Number.parseFloat(data.data.last);
 }
@@ -105,6 +107,7 @@ async function getBalance(env: Env): Promise<number> {
 			"ACCESS-SIGNATURE": signature,
 		},
 	});
+	console.log("Balance response:", response);
 
 	if (!response.ok) {
 		const errorBody = await response.text();
@@ -129,6 +132,7 @@ async function getPairInfo(): Promise<PairsResponse> {
 			`Failed to fetch pair info: status ${response.status}, message: ${errorBody}`,
 		);
 	}
+	console.log("Pairs response:", response);
 	const data: PairsResponse = await response.json();
 
 	return data;
