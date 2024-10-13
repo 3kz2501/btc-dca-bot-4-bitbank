@@ -203,13 +203,11 @@ export default {
 			} else {
 				throw new Error(`Order failed: ${JSON.stringify(orderResponse)}`);
 			}
+			console.log("Bitcoin purchase process complete.");
+			return;
 		} catch (error) {
 			console.error("Failed to purchase Bitcoin:", error);
-			// 指定のアドレスにメール通知など贈りたい場合はここに処理を追加します
+			return;
 		}
-
-		console.log("Bitcoin purchase process complete.");
-
-		return;
 	},
 };
