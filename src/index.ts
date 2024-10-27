@@ -9,7 +9,6 @@ interface Env {
 	BITBANK_API_KEY: string;
 	BITBANK_API_SECRET: string;
 	PURCHASE_AMOUNT_JPY: string;
-	DKIMPrivateKey: string;
 }
 
 const BITBANK_API_URL = "https://api.bitbank.cc/v1";
