@@ -23,6 +23,7 @@
 
 - `wrangler secret put BITBANK_API_KEY` でAPIキーを登録する
 - `wrangler secret put BITBANK_API_SECRET` でAPIシークレットを登録する
+
   こちらの値を絶対に他の人に漏らさないでください! 口座のAPI を悪用され不正な取引が行われる可能性があります
 
 ## Config の設定
