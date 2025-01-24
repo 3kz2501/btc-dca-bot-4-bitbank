@@ -8,7 +8,7 @@ import type {
 interface Env {
 	BITBANK_API_KEY: string;
 	BITBANK_API_SECRET: string;
-	PURCHASE_AMOUNT_JPY: string;
+	PURCHASE_AMOUNT_BTC: string;
 }
 
 const BITBANK_API_URL = "https://api.bitbank.cc/v1";
@@ -148,21 +148,6 @@ export default {
 		// event などでcron のどのタイミングで実行されるかを指定できたりする
 		try {
 			console.log("Starting Bitcoin purchase process...");
-			const purchaseAmountJPY = Number.parseFloat(env.PURCHASE_AMOUNT_JPY);
-			if (Number.isNaN(purchaseAmountJPY) || purchaseAmountJPY <= 0) {
-				throw new Error(
-					`Invalid PURCHASE_AMOUNT_JPY: ${env.PURCHASE_AMOUNT_JPY}`,
-				);
-			}
-			console.log(`Your Order Amount: ${purchaseAmountJPY} JPY`);
-
-			// jpy の残高を取得
-			const balance = await getBalance(env);
-			console.log(`Current balance: ${balance} JPY`);
-			if (balance < purchaseAmountJPY) {
-				console.error("Insufficient balance: ", balance);
-				return;
-			}
 
 			// ペア情報を取得
 			const pairInfo = await getPairInfo();
@@ -180,27 +165,36 @@ export default {
 				`btc_jpy pair amount range: ${unitAmount} ~ ${marketMaxAmount}`,
 			);
 
+			const purchaseAmountBtc = Number.parseFloat(env.PURCHASE_AMOUNT_BTC);
+			if (
+				Number.isNaN(purchaseAmountBtc) ||
+				purchaseAmountBtc < Number.parseFloat(unitAmount) ||
+				purchaseAmountBtc >= Number.parseFloat(marketMaxAmount)
+			) {
+				throw new Error(
+					`Invalid PURCHASE_AMOUNT_BTC: ${env.PURCHASE_AMOUNT_BTC}`,
+				);
+			}
 			// 現在の Bitcoin の価格を取得
 			const bitcoinPrice = await getBitcoinPrice();
 			console.log(`Current Bitcoin price: ${bitcoinPrice} JPY`);
 
-			// 購入する Bitcoin の量を計算
-			const bitcoinAmount = purchaseAmountJPY / bitcoinPrice;
-			console.log(
-				`Attempting to purchase ${bitcoinAmount} BTC for ${purchaseAmountJPY} JPY`,
-			);
-			// 購入する Bitcoin の量が取引可能な範囲内かどうかを確認
-			if (
-				bitcoinAmount < Number.parseFloat(unitAmount) ||
-				bitcoinAmount > Number.parseFloat(marketMaxAmount)
-			) {
+			// jpy の残高を取得
+			const balance = await getBalance(env);
+			console.log(`Current balance: ${balance} JPY`);
+
+			const purchaseAmountJpy = purchaseAmountBtc * bitcoinPrice;
+			if (balance < purchaseAmountJpy) {
 				throw new Error(
-					`Invalid PURCHASE_AMOUNT_JPY: ${env.PURCHASE_AMOUNT_JPY}`,
+					`Insufficient balance: ${balance} JPY < ${purchaseAmountJpy} JPY`,
 				);
 			}
 
 			// 注文を作成
-			const orderResponse = await createOrder(bitcoinAmount.toFixed(8), env);
+			const orderResponse = await createOrder(
+				purchaseAmountBtc.toFixed(8),
+				env,
+			);
 
 			// 注文が成功したかどうかを確認
 			if (orderResponse.success) {
