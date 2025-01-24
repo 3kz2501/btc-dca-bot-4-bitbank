@@ -32,7 +32,7 @@
 
 ```toml
 [vars]
-PURCHASE_AMOUNT_JPY = "2500" # 1回の購入金額, 日本円建てで入力. Bitbank 購入金額は0.0001 ~ 10.0 (BTC 建て), 換算はご自身でお願いします(https://osats.money/)
+PURCHASE_AMOUNT_BTC = "0.00015" # 1回の購入金額, BTC 建てで入力. Bitbank 購入金額は0.0001 ~ 10.0 (BTC 建て), 換算はご自身でお願いします(https://osats.money/)
 
 [triggers]
 crons = ["0 1 * * *"]  # 毎日10:00 JSTに実行, 好きなタイミングに変更可能 (https://crontab.guru/)
