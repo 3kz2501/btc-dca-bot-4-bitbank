@@ -1,6 +1,6 @@
 name = "bitcoin-dca-bot"
 main = "src/index.ts"
-compatibility_date = "2023-05-18"
+compatibility_date = "2025-04-01"
 
 [vars]
 PURCHASE_AMOUNT_BTC = "0.00015" # 1回の購入金額, BTC 建てで入力. Bitbank 購入金額は0.0001 ~ 10.0 (BTC 建て), 換算はご自身でお願いします(https://osats.money/)
