@@ -29,7 +29,7 @@ async function createSignature(
 
 async function createOrder(amount: string, env: Env): Promise<OrderResponse> {
 	const path = "/user/spot/order";
-	const nonce = Math.floor(Date.now() / 1000).toString();
+	const nonce = Date.now().toString();
 	const body = JSON.stringify({
 		pair: "btc_jpy",
 		amount: amount,
@@ -71,7 +71,7 @@ async function getBitcoinPrice(): Promise<number> {
 
 async function getBalance(env: Env): Promise<number> {
 	const path = "/user/assets";
-	const nonce = Math.floor(Date.now() / 1000).toString();
+	const nonce = Date.now().toString();
 	const signature = await createSignature(nonce, `/v1${path}`, env.BITBANK_API_SECRET);
 
 	const response = await fetch(`${BITBANK_API_URL}${path}`, {
